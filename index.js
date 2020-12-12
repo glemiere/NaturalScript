@@ -68,7 +68,7 @@ const getStratFiles = async () => {
 	// Excluding this file.
 	jsFilePaths = jsFilePaths.filter((fpath) => !fpath.includes(path.join(__dirname, "index.js")));
 	
-	let stratFiles = await filteringFilePathsUsingString(jsFilePaths, "const { Line } = ");
+	let stratFiles = await filteringFilePathsUsingString(jsFilePaths, "Line.read");
     return stratFiles;
 };
 

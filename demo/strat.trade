@@ -1,0 +1,4 @@
+Strategy: Test Strategy
+	Find the lowest performing asset
+	Purchase it at the end of the day
+	Sell it at the end of the next day

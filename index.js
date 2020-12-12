@@ -8,14 +8,18 @@
 const path = require("path");
 const fs = require("fs");
 const readline = require('readline');
+const util = require('util');
+//const exec = util.promisify(require('child_process').exec);
 
 const green = "\x1b[32m";
 const white = "\x1b[37m";
 
+const { Line } = require('./lib');
+
 const asyncFilter = async (arr, predicate) => {
 	const results = await Promise.all(arr.map(predicate));
 	return arr.filter((_v, index) => results[index]);
-}
+};
 
 const getFilePaths = async function (startPath, filter, filepaths) {
     if (!fs.existsSync(startPath)) return;
@@ -69,10 +73,17 @@ const getStratFiles = async () => {
     return stratFiles;
 };
 
+const executeStratFiles = async (stratFiles) => {
+	stratFiles.forEach(async (stratFile) => {
+		await require(stratFile);
+	});
+};
+
 const main = async () => {
 	const stratFiles = await getStratFiles();
+	await executeStratFiles(stratFiles);
 
-	console.log(stratFiles);
+	console.log(Line.lexic);
 };
 
 main();

@@ -88,7 +88,7 @@ const getFileLines = async (filePath) => {
 	});
 
 	for await (const line of rl)
-		lines.push(line);
+		lines.push(line.trim());
 	const name = lines.shift();
 	return {
 		name: name,
@@ -103,15 +103,22 @@ const buildStrategiesArray = async () => {
 		strategy = await getFileLines(file);
 		strategies.push(strategy);
 	}
-	console.log(strategies);
+	return strategies;
+};
+
+const executeStrategy = async (strategies) => {
+	for (const instruction of Line.lexic)
+		for (const strategy of strategies)
+			for (const line of strategy.lines)
+				if (line.match(instruction.rule))
+					await instruction.func(...instruction.args);
 };
 
 const main = async () => {
 	const stratFiles = await getStratFiles();
 	await executeStratFiles(stratFiles);
-	await buildStrategiesArray();
-
-	console.log(Line.lexic);
+	const strategies = await buildStrategiesArray();
+	await executeStrategy(strategies);
 };
 
 main();

@@ -9,7 +9,6 @@ const path = require("path");
 const fs = require("fs");
 const readline = require('readline');
 const util = require('util');
-//const exec = util.promisify(require('child_process').exec);
 
 const green = "\x1b[32m";
 const white = "\x1b[37m";
@@ -79,9 +78,38 @@ const executeStratFiles = async (stratFiles) => {
 	});
 };
 
+const getFileLines = async (filePath) => {
+	const lines = [];
+	const fileStream = fs.createReadStream(filePath);
+
+	const rl = readline.createInterface({
+		input: fileStream,
+		crlfDelay: Infinity
+	});
+
+	for await (const line of rl)
+		lines.push(line);
+	const name = lines.shift();
+	return {
+		name: name,
+		lines: lines
+	};
+};
+
+const buildStrategiesArray = async () => {
+	const strategies = [];
+	const tradeFiles = await getFilePaths(path.join(__dirname, "./"), ".trade", []);
+	for (const file of tradeFiles) {
+		strategy = await getFileLines(file);
+		strategies.push(strategy);
+	}
+	console.log(strategies);
+};
+
 const main = async () => {
 	const stratFiles = await getStratFiles();
 	await executeStratFiles(stratFiles);
+	await buildStrategiesArray();
 
 	console.log(Line.lexic);
 };

@@ -106,6 +106,7 @@ const buildStrategiesArray = async () => {
 	return strategies;
 };
 
+// TODO: Implement hash table to avoid extra looping.
 const executeStrategy = async (strategies) => {
 	for (const instruction of Line.lexic)
 		for (const strategy of strategies)

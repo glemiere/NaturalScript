@@ -111,15 +111,17 @@ const getMatchArguments = (match) => {
 	return match;
 };
 
-// TODO: Implement hash table to avoid extra looping.
 const executeStrategy = async (strategies) => {
 	let match;
 
 	for (const instruction of Line.lexic)
 		for (const strategy of strategies)
-			for (const line of strategy.lines)
+			for (const line of strategy.lines) {
+				console.log(line, instruction.rule);
 				if (match = line.match(instruction.rule))
 					await instruction.func(...getMatchArguments(match));
+					strategy.lines.shift();
+			}
 };
 
 const main = async () => {

@@ -117,11 +117,12 @@ const executeStrategy = async (strategies) => {
 	for (const instruction of Line.lexic)
 		for (const strategy of strategies)
 			for (const line of strategy.lines) {
-				console.log(line, instruction.rule);
-				if (match = line.match(instruction.rule))
+				if (match = line.match(instruction.rule)) {
 					await instruction.func(...getMatchArguments(match));
-					strategy.lines.shift();
+					strategy.lines.splice(strategy.lines.indexOf(line), 1);
+				}
 			}
+
 };
 
 const main = async () => {

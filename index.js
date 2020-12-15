@@ -106,13 +106,20 @@ const buildStrategiesArray = async () => {
 	return strategies;
 };
 
+const getMatchArguments = (match) => {
+	match.splice(0, 1);
+	return match;
+};
+
 // TODO: Implement hash table to avoid extra looping.
 const executeStrategy = async (strategies) => {
+	let match;
+
 	for (const instruction of Line.lexic)
 		for (const strategy of strategies)
 			for (const line of strategy.lines)
-				if (line.match(instruction.rule))
-					await instruction.func(...instruction.args);
+				if (match = line.match(instruction.rule))
+					await instruction.func(...getMatchArguments(match));
 };
 
 const main = async () => {

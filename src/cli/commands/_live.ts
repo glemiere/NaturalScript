@@ -97,8 +97,8 @@ export default class Live {
         return strategies;
     };
 
-    private getMatchArguments(match:Array<string>): Array<string> {
-    	match.splice(0, 1);
+    private async getMatchArguments(match:Array<string>): Promise<Array<string>> {
+        match.splice(0, 1);
     	return match;
     };
 
@@ -109,7 +109,8 @@ export default class Live {
     		for (const strategy of strategies)
     			for (const line of strategy.lines)
     				if (match = line.match(instruction.rule)) {
-    					await instruction.func(...this.getMatchArguments(match));
+                        const args = await this.getMatchArguments(match);
+    					await instruction.func(...args);
     					strategy.lines.splice(strategy.lines.indexOf(line), 1);
     				}
     };

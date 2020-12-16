@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs";
 import readline from "readline";
-import util from "util";
 
 import Line from "../../line";
 

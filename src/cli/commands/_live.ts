@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import readline from "readline";
+import md5 from "crypto-js/md5";
 
 import Line from "../../line";
 
@@ -52,7 +53,7 @@ export default class Live {
         return filtered;
     };
 
-    private async getStratFiles(): Promise<Array<string>> {
+    private async getInstructionFiles(): Promise<Array<string>> {
         let jsFilePaths = await this.getFilePaths(path.join(process.cwd(), "./"), ".js", []);
     
         // Excluding this file.
@@ -62,16 +63,15 @@ export default class Live {
         return stratFiles;
     };
 
-    private async executeStratFiles(stratFiles:Array<string>): Promise<void> {
+    private async executeInstructionFiles(stratFiles:Array<string>): Promise<void> {
         stratFiles.forEach(async (stratFile) => {
             await require(stratFile);
         });
     };
 
-    private async getFileLines(filePath:string) :Promise<{name:string, lines:Array<string>}> {
+    private async readStrategyFile(filePath:string) :Promise<{name:string, lines:Array<string>}> {
         const lines = [];
         const fileStream = fs.createReadStream(filePath);
-    
         const rl:any = readline.createInterface({
             input: fileStream,
             crlfDelay: Infinity
@@ -79,46 +79,120 @@ export default class Live {
     
         for await (const line of rl)
             lines.push(line.trim());
+
         const name = lines.shift();
+
         return {
             name: name,
             lines: lines
         };
     };
 
-    private async buildStrategiesArray():Promise<Array<{name:string, lines:Array<string>}>> {
+    private async findStrategyFiles():Promise<Array<string>> {
+        const cmd_args = process.argv.splice(3);
+        let stratFiles;
+
+        if (cmd_args.length > 0)
+            stratFiles = cmd_args.map((filepath) => {
+                return path.join(process.cwd(), filepath);
+            });
+        else
+            stratFiles = await this.getFilePaths(path.join(process.cwd(), "./"), ".trade", []);
+
+        return stratFiles;
+    };
+
+    private async getStrategiesRawData(stratFiles:Array<string>):Promise<Array<{name:string, lines:Array<string>}>> {
         const strategies = [];
-        const tradeFiles = await this.getFilePaths(path.join(process.cwd(), "./"), ".trade", []);
-        for (const file of tradeFiles) {
-            const strategy = await this.getFileLines(file);
+
+        for (const file of stratFiles) {
+            const strategy = await this.readStrategyFile(file);
             strategies.push(strategy);
         }
         return strategies;
     };
 
-    private async getMatchArguments(match:Array<string>): Promise<Array<string>> {
-        match.splice(0, 1);
-    	return match;
+    private async getMatchArguments(args:Array<string>): Promise<Array<string>> {
+        args.splice(0, 1);
+        let i = -1;
+
+        while(args[++i])
+            args[i] = args[i].split(`"`).join(``);
+
+    	return args;
     };
 
-    private async executeStrategy(strategies:any) {
-    	let match;
+    private async getInstructionFromLexic(line: string) :Promise<any> {
+        const argExtract = /(["])(?:(?=(\\?))\2.)*?\1/g;
+        const args = line.match(argExtract);
 
-    	for (const instruction of Line.lexic)
-    		for (const strategy of strategies)
-    			for (const line of strategy.lines)
-    				if (match = line.match(instruction.rule)) {
-                        const args = await this.getMatchArguments(match);
-    					await instruction.func(...args);
-    					strategy.lines.splice(strategy.lines.indexOf(line), 1);
-    				}
+        if (!args)
+            return Line.lexic[md5(line).toString()];
+
+        for (const arg of args) {
+            const str  = line.replace(arg, '').match(Line.criteria).join(" ");
+            const hash = md5(str).toString();
+
+            if (Line.lexic[hash])
+                return Line.lexic[hash];
+        }
+
+        return null;
+    };
+
+    private async getExecutableStrategyLine(lines:Array<string>):Promise<Array<{func:Function, args: Array<string>}>> {
+        const executableLines = new Array();
+
+        for (const line of lines) {
+            const instruction = await this.getInstructionFromLexic(line);
+
+            if (!instruction || (instruction && !line.match(instruction.rule))) {
+                console.error(`Error, line: "${line}" does not match any instruction.`);
+                process.exit(0);
+            }
+
+            const args = await this.getMatchArguments(line.match(instruction.rule));
+            executableLines.push({
+                func: instruction.func,
+                args: args
+            });
+        }
+
+        return executableLines;
+    }
+
+    private async buildExecutableStrategies(strategies:Array<{name:string, lines:Array<string>}>) :Promise<Array<{name:string, lines:Array<{func: Function, args: Array<string>}>}>> {
+        const executableStrategies = new Array();
+
+        for (const strategy of strategies) {
+            const executableLines = await this.getExecutableStrategyLine(strategy.lines);
+
+            executableStrategies.push({
+                name: strategy.name,
+                lines: executableLines
+            });
+        }
+
+        return executableStrategies;
+    };
+
+    private async executeStrategies(executableStrategies:Array<{name:string, lines:Array<{func: Function, args: Array<string>}>}>) {
+        for (const strategy of executableStrategies) {
+            console.success(`Executing Strategy: ${strategy.name}`);
+            for (const line of strategy.lines)
+                await line.func(...line.args);
+        }
     };
   
     public async exec(): Promise<void> {
-        const stratFiles = await this.getStratFiles();
-        await this.executeStratFiles(stratFiles);
-        const strategies = await this.buildStrategiesArray();
-        await this.executeStrategy(strategies);
+        const instructionFiles = await this.getInstructionFiles();
+        await this.executeInstructionFiles(instructionFiles);
+
+        const stratFiles = await this.findStrategyFiles();
+        const rawStrategies = await this.getStrategiesRawData(stratFiles);
+        const executableStrategies = await this.buildExecutableStrategies(rawStrategies);
+        await this.executeStrategies(executableStrategies);
+
         process.exit();
     }
 }

@@ -92,10 +92,12 @@ export default class Live {
         const cmd_args = process.argv.splice(3);
         let stratFiles;
 
-        if (cmd_args.length > 0)
+        if (cmd_args.length > 0 && cmd_args[0].includes('.trade'))
             stratFiles = cmd_args.map((filepath) => {
                 return path.join(process.cwd(), filepath);
             });
+        else if (cmd_args.length === 1 && !cmd_args[0].includes('.trade'))
+            stratFiles = await this.getFilePaths(path.join(process.cwd(), cmd_args[0]), ".trade", []);
         else
             stratFiles = await this.getFilePaths(path.join(process.cwd(), "./"), ".trade", []);
 

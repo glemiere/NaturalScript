@@ -5,7 +5,9 @@
   "main": "./lib/index.js",
   "scripts": {
     "build": "rm -rf ./lib && tsc -p . && npm install -g",
-    "start": "tradescript"
+    "start": "tradescript",
+    "preinstall": "npm install typescript",
+    "postinstall": "npm run build"
   },
   "keywords": [
     "cli",

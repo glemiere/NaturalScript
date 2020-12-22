@@ -2,7 +2,9 @@
 A natural language interpreter to make your TypeScript more Natural and let humans automate trading strategies!
 
 ## Installation
-`npm install`
+`npm install`<br/>
+`npm run build`
 
 ## Demo
-`tradescript live demo/strategies/strat.trade`
+`cd demo`<br/>
+`tradescript live`

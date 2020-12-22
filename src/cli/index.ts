@@ -3,13 +3,15 @@ import logger from "./logger";
 
 import {
   Info,
-  Live
+  Live,
+  Compile
 } from "./commands";
 
 export default class Cli {
   public options: Array<{cmdStr: string, exec: () => any}>;
   public info: Info;
   public live: Live;
+  public compile: Compile;
 
   constructor(
     public args: string[],
@@ -18,6 +20,7 @@ export default class Cli {
     this.options  = new Array();
     this.info     = new Info();
     this.live     = new Live();
+    this.compile  = new Compile();
   }
 
   public async init(): Promise<void> {
@@ -25,6 +28,7 @@ export default class Cli {
       {cmdStr: `help`, exec: this.help.bind(this)},
       {cmdStr: `info`, exec: this.info.exec.bind(this.info)},
       {cmdStr: `live`, exec: this.live.exec.bind(this.live)},
+      {cmdStr: `compile`, exec: this.compile.exec.bind(this.compile)},
     );
 
     const isVerbose = this.args.indexOf("--verbose") != -1;

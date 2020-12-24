@@ -6,5 +6,12 @@ A natural language interpreter to make your TypeScript more Natural and let huma
 `npm run build`
 
 ## Demo
-`cd demo`<br/>
-`tradescript live`
+### TradeScript Live Command
+`tradescript live demo/`<br/>
+or <br/>
+`tradescript live demo/strategies/strat.trade` <br/>
+or <br/>
+`tradescript live demo/strategies/strat.trade demo/strategies/strat.trade`
+
+### TradeScript Compilation
+Coming soon...

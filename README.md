@@ -14,4 +14,4 @@ or <br/>
 `tradescript live demo/strategies/strat.trade demo/strategies/strat.trade`
 
 ### TradeScript Compilation
-Coming soon...
+Coming soon...!

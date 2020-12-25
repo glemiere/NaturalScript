@@ -1,7 +1,10 @@
 import {
     ProjectScanner,
-    StrategyBuilder
+    StrategyBuilder,
+    Strategy
 } from "./core";
+
+import { IExecutableStrategy } from "./core/interfaces";
 
 export default class Compile {
     private projectScanner: ProjectScanner;
@@ -12,18 +15,22 @@ export default class Compile {
         this.strategyBuilder = new StrategyBuilder();
     };
 
+    private async compileStrategies(executableStrategies:Array<IExecutableStrategy>) {
+        for (const strategy of executableStrategies)
+            await new Strategy(strategy).compile();
+    };
+
     public async exec(): Promise<void> {
         await this.projectScanner.init();
 
         const stratFiles = await this.projectScanner.getStrategyFiles();
+
+        // TODO: Discuss design decision with Matheo, keep it stateless or go full OOP to chain methods.
         const rawStrategies = await this.strategyBuilder.getStrategiesRawData(stratFiles);
+        const executableStrategies = await this.strategyBuilder.buildExecutableStrategies(rawStrategies);
 
-        console.log('Compiling...');
-        console.log(JSON.stringify(rawStrategies, null, 2));
+        await this.compileStrategies(executableStrategies);
 
-        const instructionFiles = await this.projectScanner.getInstructionFiles();
-        console.log(JSON.stringify(instructionFiles, null, 2));
-        
         process.exit();
     };
 }

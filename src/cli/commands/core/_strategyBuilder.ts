@@ -1,6 +1,7 @@
 import md5 from "crypto-js/md5";
 import Line from "../../../line";
 import { ProjectScanner } from "./";
+import { IExecutableStrategy } from "./interfaces";
 
 export default class StrategyBuilder {
     private projectScanner: ProjectScanner;
@@ -9,7 +10,7 @@ export default class StrategyBuilder {
         this.projectScanner = new ProjectScanner();
     };
 
-    public async buildExecutableStrategies(strategies:Array<{name:string, lines:Array<string>}>) :Promise<Array<{name:string, lines:Array<{func: Function, args: Array<string>}>}>> {
+    public async buildExecutableStrategies(strategies:Array<{name:string, lines:Array<string>}>) :Promise<Array<IExecutableStrategy>> {
         const executableStrategies = new Array();
 
         for (const strategy of strategies) {

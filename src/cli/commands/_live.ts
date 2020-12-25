@@ -1,7 +1,10 @@
 import {
     ProjectScanner,
-    StrategyBuilder
+    StrategyBuilder,
+    Strategy
 } from "./core";
+
+import { IExecutableStrategy } from "./core/interfaces";
 
 export default class Live {
     private projectScanner: ProjectScanner;
@@ -12,12 +15,9 @@ export default class Live {
         this.strategyBuilder = new StrategyBuilder();
     };
 
-    private async executeStrategies(executableStrategies:Array<{name:string, lines:Array<{func: Function, args: Array<string>}>}>) {
-        for (const strategy of executableStrategies) {
-            console.success(`Executing Strategy: ${strategy.name}`);
-            for (const line of strategy.lines)
-                await line.func(...line.args);
-        }
+    private async executeStrategies(executableStrategies:Array<IExecutableStrategy>) {
+        for (const strategy of executableStrategies)
+            await new Strategy(strategy).execute();
     };
 
     public async exec(): Promise<void> {

@@ -20,7 +20,6 @@ export default class Live {
         }
     };
 
-
     public async exec(): Promise<void> {
         await this.projectScanner.init();
 

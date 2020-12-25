@@ -20,6 +20,26 @@ export default class ProjectScanner {
         return this._stratFiles;
     };
 
+
+    public async readStrategyFile(filePath:string) :Promise<{name:string, lines:Array<string>}> {
+        const lines = [];
+        const fileStream = fs.createReadStream(filePath);
+        const rl:any = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+    
+        for await (const line of rl)
+            lines.push(line.trim());
+
+        const name = lines.shift();
+
+        return {
+            name: name,
+            lines: lines
+        };
+    };
+
     private async _setInstructionFiles(): Promise<Array<string>> {
         let jsFilePaths = await this._getFilePaths(path.join(process.cwd(), "./"), ".js", []);
     
@@ -50,25 +70,6 @@ export default class ProjectScanner {
             stratFiles = await this._getFilePaths(path.join(process.cwd(), "./"), ".trade", []);
 
         return this._stratFiles = stratFiles;
-    };
-
-    public async readStrategyFile(filePath:string) :Promise<{name:string, lines:Array<string>}> {
-        const lines = [];
-        const fileStream = fs.createReadStream(filePath);
-        const rl:any = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity
-        });
-    
-        for await (const line of rl)
-            lines.push(line.trim());
-
-        const name = lines.shift();
-
-        return {
-            name: name,
-            lines: lines
-        };
     };
 
     private async _asyncFilter(arr:Array<any>, predicate:any) :Promise<Array<any>> {

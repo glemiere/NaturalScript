@@ -37,7 +37,7 @@ export default class Live {
             return Line.lexic[md5(line).toString()];
 
         for (const arg of args) {
-            const str  = line.replace(arg, '').match(Line.criteria).join(" ");
+            const str  = line.replace(arg, '').match(Line.criteriaWordsOnly).join(" ");
             const hash = md5(str).toString();
 
             if (Line.lexic[hash])

@@ -6,11 +6,11 @@ interface ILexic {
 
 class Line {
     public lexic:ILexic;
-    public criteria:RegExp;
+    public criteriaWordsOnly:RegExp;
 
     constructor() {
         this.lexic = {};
-        this.criteria = /(\w+)/g;
+        this.criteriaWordsOnly = /(\w+)/g;
     }
 
     public async read(regex: RegExp, callback:Function):Promise<void> {
@@ -23,7 +23,7 @@ class Line {
     }
 
     public buildLineHash(regex: RegExp): string {
-        const str = regex.toString().match(this.criteria).join(" ");
+        const str = regex.toString().match(this.criteriaWordsOnly).join(" ");
         return md5(str).toString();
     }
 }

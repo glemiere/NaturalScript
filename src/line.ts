@@ -5,7 +5,7 @@ interface ILexic {
 }
 
 class Line {
-    public lexic:ILexic; //{rule: RegExp, func: Function};
+    public lexic:ILexic;
     public criteria:RegExp;
 
     constructor() {

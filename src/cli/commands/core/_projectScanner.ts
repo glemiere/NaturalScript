@@ -24,7 +24,7 @@ export default class ProjectScanner {
         let jsFilePaths = await this._getFilePaths(path.join(process.cwd(), "./"), ".js", []);
     
         // Excluding this file.
-        jsFilePaths = jsFilePaths.filter((fpath) => !fpath.includes(path.join(__dirname, "index.js")));
+        jsFilePaths = jsFilePaths.filter((fpath) => !fpath.includes(path.join(__dirname, "_projectScanner.js")));
     
         let instructionFiles = await this._filteringFilePathsUsingString(jsFilePaths, "Line.read");
         return this._instructionFiles = instructionFiles;

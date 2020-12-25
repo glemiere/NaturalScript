@@ -25,6 +25,10 @@ export default class Compile {
 
         console.log('Compiling...');
         console.log(JSON.stringify(rawStrategies, null, 2));
+
+        const instructionFiles = await this.projectScanner.getInstructionFiles();
+        console.log(JSON.stringify(instructionFiles, null, 2));
+        
         process.exit();
     }
 }

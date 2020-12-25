@@ -92,10 +92,9 @@ export default class Live {
     };
   
     public async exec(): Promise<void> {
-        const instructionFiles = await this.projectScanner.getInstructionFiles();
-        await this.projectScanner.executeInstructionFiles(instructionFiles);
+        await this.projectScanner.init();
 
-        const stratFiles = await this.projectScanner.findStrategyFiles();
+        const stratFiles = await this.projectScanner.getStrategyFiles();
         const rawStrategies = await this.getStrategiesRawData(stratFiles);
         const executableStrategies = await this.buildExecutableStrategies(rawStrategies);
         await this.executeStrategies(executableStrategies);

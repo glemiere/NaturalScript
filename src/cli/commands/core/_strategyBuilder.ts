@@ -1,7 +1,10 @@
 import md5 from "crypto-js/md5";
 import Line from "../../../line";
 import { ProjectScanner } from "./";
-import { IExecutableStrategy } from "./interfaces";
+import {
+    IExecutableStrategy,
+    IStrategyLine
+} from "./interfaces";
 
 export default class StrategyBuilder {
     private projectScanner: ProjectScanner;
@@ -34,6 +37,30 @@ export default class StrategyBuilder {
         }
         return strategies;
     };
+
+    public async makeCompilableStrategyObject(lines: Array<IStrategyLine>) {
+        let compilable:any = {};
+
+        for (const line of lines) {
+            const func = line.func.toString();
+            const funcName = md5(func).toString();
+
+            compilable[funcName] = {
+                args: line.args,
+                func: await this.nameFunction(func, funcName)
+            };
+        }
+
+        return compilable;
+    };
+
+    private async nameFunction(func: string, name:string): Promise<string> {
+        const insertCriteria = "async function";
+        const insertAt = func.indexOf(insertCriteria) + insertCriteria.length;
+
+        func = `${func.slice(0, insertAt)} ${name}${func.slice(insertAt)}`;
+        return func;
+    }
 
     private async _getMatchArguments(args:Array<string>): Promise<Array<string>> {
         args.splice(0, 1);

@@ -1,1 +1,4 @@
-export { IExecutableStrategy } from './_executableStrategy';
+export {
+    IExecutableStrategy,
+    IStrategyLine
+} from './_executableStrategy';

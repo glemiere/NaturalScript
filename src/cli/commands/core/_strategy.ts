@@ -1,10 +1,13 @@
+import { StrategyBuilder } from "./";
 import { IExecutableStrategy } from "./interfaces";
 
 export default class Strategy {
     private strategy: IExecutableStrategy;
+    private strategyBuilder: StrategyBuilder;
 
     constructor(strategy: IExecutableStrategy){
         this.strategy = strategy;
+        this.strategyBuilder = new StrategyBuilder();
     };
 
     public async execute() :Promise<void> {
@@ -14,6 +17,9 @@ export default class Strategy {
     };
 
     public async compile(binary?: boolean) :Promise<void> {
-        console.log(`Compiling...`);
+        console.success(`Compiling... ${this.strategy.name}`);
+        const compilable = await this.strategyBuilder.makeCompilableStrategyObject(this.strategy.lines);
+
+        console.log(JSON.stringify(compilable, null, 2));
     };
- }
+}

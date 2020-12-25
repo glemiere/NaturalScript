@@ -10,7 +10,7 @@ export default class ProjectScanner {
         const instructionFiles = await this._setInstructionFiles();
         await this._executeInstructionFiles(instructionFiles);
         await this._setStrategyFiles();
-    }
+    };
 
     public async getInstructionFiles(): Promise<Array<string>> {
         return this._instructionFiles;

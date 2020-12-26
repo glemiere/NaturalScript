@@ -43,15 +43,25 @@ export default class StrategyBuilder {
 
         for (const line of lines) {
             const func = line.func.toString();
-            const funcName = md5(func).toString();
+            const funcName = `func_${md5(func).toString()}`;
 
             compilable[funcName] = {
-                args: line.args,
+                args: await this.makeCompilableArguments(line.args),
                 func: await this.nameFunction(func, funcName)
             };
         }
 
         return compilable;
+    };
+
+    // String by default, need to work on this to support other types.
+    private async makeCompilableArguments(args: Array<string>) {
+        let i = -1;
+
+        while (args[++i])
+            args[i] = `"${args[i]}"`;
+            
+        return args;
     };
 
     private async nameFunction(func: string, name:string): Promise<string> {
@@ -60,7 +70,7 @@ export default class StrategyBuilder {
 
         func = `${func.slice(0, insertAt)} ${name}${func.slice(insertAt)}`;
         return func;
-    }
+    };
 
     private async _getMatchArguments(args:Array<string>): Promise<Array<string>> {
         args.splice(0, 1);
@@ -76,34 +86,37 @@ export default class StrategyBuilder {
         const argExtract = /(["])(?:(?=(\\?))\2.)*?\1/g;
         const args = line.match(argExtract);
 
-        if (!args)
-            return Line.lexic[md5(line).toString()];
+        if (!args) {
+            const hash = md5(line).toString();
+            return {hash: hash, details: Line.lexic[hash.toString()]};
+        }
 
         for (const arg of args) {
             const str  = line.replace(arg, '').match(Line.criteriaWordsOnly).join(" ");
             const hash = md5(str).toString();
 
             if (Line.lexic[hash])
-                return Line.lexic[hash];
+                return {hash: hash, details: Line.lexic[hash]};
         }
 
         return null;
     };
 
-    private async _getExecutableStrategyLine(lines:Array<string>):Promise<Array<{func:Function, args: Array<string>}>> {
+    private async _getExecutableStrategyLine(lines:Array<string>):Promise<Array<{func:Function, args: Array<string>, hash:string}>> {
         const executableLines = new Array();
 
         for (const line of lines) {
             const instruction = await this._getInstructionFromLexic(line);
 
-            if (!instruction || (instruction && !line.match(instruction.rule))) {
+            if (!instruction || (instruction && instruction.details && !line.match(instruction.details.rule))) {
                 console.error(`Error, line: "${line}" does not match any instruction.`);
                 process.exit(0);
             }
 
-            const args = await this._getMatchArguments(line.match(instruction.rule));
+            const args = await this._getMatchArguments(line.match(instruction.details.rule));
             executableLines.push({
-                func: instruction.func,
+                func: instruction.details.func,
+                hash: instruction.hash,
                 args: args
             });
         }
